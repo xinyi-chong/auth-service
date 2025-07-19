@@ -47,7 +47,7 @@ CREATE INDEX idx_auth_methods_user_type ON auth.auth_methods (user_id, method_ty
 
 CREATE TABLE auth.security_logs
 (
-    id      UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
+    id      UUID DEFAULT uuid_generate_v7(),
     user_id UUID        REFERENCES auth.users (id) ON DELETE SET NULL,
     action  VARCHAR(50) NOT NULL CHECK (
         action IN ('login', 'login_failed', 'logout', 'token_refresh',
@@ -60,7 +60,8 @@ CREATE TABLE auth.security_logs
     user_agent TEXT,
     device_fingerprint VARCHAR(255),
     metadata JSONB DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, created_at)
 ) PARTITION BY RANGE (created_at);
 
 CREATE TABLE auth.security_logs_default PARTITION OF auth.security_logs DEFAULT;
