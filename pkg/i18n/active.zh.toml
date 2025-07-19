@@ -1,0 +1,3 @@
+[errors]
+registration_failed = "注册失败"
+invalid_email = "无效的电子邮件地址"
