@@ -8,8 +8,8 @@ CREATE SCHEMA auth;
 CREATE TABLE auth.users
 (
     id                   UUID PRIMARY KEY     DEFAULT uuid_generate_v7(),
-    username             VARCHAR(50),
-    email                VARCHAR(255),
+    username             VARCHAR(50) UNIQUE,
+    email                VARCHAR(255) UNIQUE,
     email_verified       BOOLEAN     NOT NULL DEFAULT FALSE,
     password_hash        TEXT, -- Nullable for social logins
     last_login           TIMESTAMPTZ,
