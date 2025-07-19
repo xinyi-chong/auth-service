@@ -31,4 +31,5 @@ go.work.sum
 .idea/
 # .vscode/
 
-configs/
+/docs/docs.go
+/docs/swagger*
