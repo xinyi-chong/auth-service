@@ -1,10 +1,5 @@
 BEGIN;
 
-CREATE
-EXTENSION IF NOT EXISTS "pg_uuidv7";
-
-CREATE SCHEMA auth;
-
 CREATE TABLE auth.users
 (
     id                   UUID PRIMARY KEY     DEFAULT uuid_generate_v7(),
