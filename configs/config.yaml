@@ -2,7 +2,7 @@ server:
   host: #"0.0.0.0"
   port: 8080
 
-postgres:
+auth_postgres:
   host: "shared-postgres"
   port: 5432
   user:
@@ -17,8 +17,9 @@ redis:
   host:
   port:
   password:
-  db:
+  db: 0
 
 jwt:
+  secret_key:
   access_duration: "15m"
   refresh_duration: "2160h"

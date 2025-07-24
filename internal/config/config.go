@@ -21,13 +21,14 @@ type Config struct {
 
 	Postgres struct {
 		db.Config `mapstructure:",squash"`
-	} `mapstructure:"postgres"`
+	} `mapstructure:"auth_postgres"`
 
 	Redis struct {
 		redisclient.Config `mapstructure:",squash"`
 	} `mapstructure:"redis"`
 
 	JWT struct {
+		SecretKey       string        `mapstructure:"secret_key" validate:"required"`
 		AccessDuration  time.Duration `mapstructure:"access_duration"`
 		RefreshDuration time.Duration `mapstructure:"refresh_duration"`
 	} `mapstructure:"jwt"`
