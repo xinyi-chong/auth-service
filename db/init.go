@@ -21,13 +21,14 @@ type Config struct {
 }
 
 func Init(cfg Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s search_path=%s",
 		cfg.Host,
 		cfg.Port,
 		cfg.User,
 		cfg.Password,
 		cfg.DB,
-		cfg.SSLMode)
+		cfg.SSLMode,
+		"auth")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
