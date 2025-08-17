@@ -3,6 +3,7 @@ package middleware
 import (
 	"auth-service/internal/shared/consts"
 	"auth-service/internal/shared/response"
+	apperrors "auth-service/pkg/error"
 	token "auth-service/pkg/jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -35,12 +36,12 @@ func RateLimit(requests int, duration time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		context, err := instance.Get(c, c.ClientIP())
 		if err != nil {
-			response.InternalServerError(c, "internal_server_error")
+			response.Error(c, apperrors.ErrInternalServerError)
 			return
 		}
 
 		if context.Reached {
-			response.TooManyRequests(c, "too_many_request")
+			response.Error(c, apperrors.ErrTooManyRequests)
 			return
 		}
 
@@ -55,20 +56,20 @@ func AuthMiddleware() gin.HandlerFunc {
 		if strings.HasPrefix(authHeader, "Bearer ") {
 			bearerToken = strings.TrimPrefix(authHeader, "Bearer ")
 		} else {
-			response.Unauthorized(c, "unauthorized")
+			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
 
 		ctx := c.Request.Context()
 		blacklisted, _ := token.IsTokenBlacklisted(ctx, bearerToken)
 		if blacklisted {
-			response.Unauthorized(c, "unauthorized")
+			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
 
 		accessClaims, err := token.ParseAccessToken(bearerToken)
 		if err != nil {
-			response.Unauthorized(c, "unauthorized")
+			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
 

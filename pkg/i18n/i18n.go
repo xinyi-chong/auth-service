@@ -9,39 +9,59 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"go.uber.org/zap"
 	"golang.org/x/text/language"
+	"strings"
+	"sync"
 )
 
 type TemplateData map[string]interface{}
+type Category string
+type Message string
+
+const (
+	CategorySuccess Category = "success"
+	CategoryError   Category = "error"
+)
 
 //go:embed *.toml
 var fs embed.FS
 
 var (
-	bundle *i18n.Bundle
+	bundle     *i18n.Bundle
+	bundleOnce sync.Once
 )
 
 func Init() error {
-	bundle = i18n.NewBundle(language.English)
-	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
+	var initErr error
+	bundleOnce.Do(func() {
+		bundle = i18n.NewBundle(language.English)
+		bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
-	if _, err := bundle.LoadMessageFileFS(fs, "active.en.toml"); err != nil {
-		return err
-	}
-	if _, err := bundle.LoadMessageFileFS(fs, "active.zh.toml"); err != nil {
-		return err
-	}
+		entries, err := fs.ReadDir(".")
+		if err != nil {
+			initErr = err
+			return
+		}
 
-	return nil
+		for _, entry := range entries {
+			if strings.HasSuffix(entry.Name(), ".toml") {
+				if _, err := bundle.LoadMessageFileFS(fs, entry.Name()); err != nil {
+					initErr = err
+					return
+				}
+			}
+		}
+	})
+	return initErr
 }
 
 func GetLocalizer(langs ...string) *i18n.Localizer {
 	return i18n.NewLocalizer(bundle, langs...)
 }
 
-func Translate(c context.Context, messageID string, templateData ...TemplateData) string {
+func Translate(c context.Context, category Category, messageID string, templateData ...TemplateData) string {
 	localizer, ok := c.Value(consts.Localizer).(*i18n.Localizer)
 	if !ok || localizer == nil {
-		logger.Log.Debug("Translate: no localizer found in context")
+		logger.Error("Translate: no localizer found in context")
 		return messageID
 	}
 
@@ -51,16 +71,16 @@ func Translate(c context.Context, messageID string, templateData ...TemplateData
 	}
 
 	message, err := localizer.Localize(&i18n.LocalizeConfig{
-		MessageID:    messageID,
+		MessageID:    string(category) + "." + messageID,
 		TemplateData: data,
 	})
 	if err != nil {
-		logger.Log.Debug(
+		logger.Warn(
 			"Translate: translation missing",
 			zap.String("messageID", messageID),
 			zap.Error(err),
 		)
-		return messageID // Fallback to message ID
+		return messageID
 	}
 	return message
 }

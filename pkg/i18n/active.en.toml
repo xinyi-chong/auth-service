@@ -1,3 +1,25 @@
-[errors]
-registration_failed = "Registration failed"
-invalid_email = "Invalid email address"
+[error]
+    unauthorized = "Unauthorized"
+    request_failed = "Request failed"
+    session_expired = "Session expired"
+    bad_request = "Bad request"
+    internal_server_error = "Something went wrong"
+    "too_many_request" = "Too many request, please try again later"
+    registration_failed = "Registration failed"
+    invalid_email = "Invalid email address"
+    incorrect_email_or_password = "Email or password is incorrect"
+    incorrect_password = "Incorrect password"
+    email_already_exists = "Email already exists"
+    user_not_found = "User not found"
+    username_already_exists = "Username already exists"
+
+[success]
+    session_refreshed = "Session refreshed"
+    registered = "Registration successful"
+    logged_in = "Logged in"
+    logged_out = "Logged out"
+    password_changed = "Password changed successfully"
+    password_reset = "Password reset successful"
+    user_updated = "User updated successfully"
+    user_deleted = "User deleted successfully"
+    user_found = "User profile loaded successfully"
