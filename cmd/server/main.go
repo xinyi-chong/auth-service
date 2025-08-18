@@ -11,6 +11,8 @@ import (
 
 // @title Auth Service
 // @version 1.0
+// @host localhost:8080
+// @basePath /api/v1
 // @description JWT Authentication
 // @securityDefinitions.apikey BearerTokenAuth
 // @in header
