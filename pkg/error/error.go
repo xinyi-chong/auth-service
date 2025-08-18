@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"net/http"
+	"strings"
 )
 
 var (
@@ -29,6 +30,7 @@ type Error struct {
 	HTTPStatus   int                 // HTTP status code
 	Err          error               // Wrapped error, if any
 	TemplateData locale.TemplateData // For dynamic i18n translation
+	Tags         []string
 }
 
 func New(code, defaultMsg string, status int) *Error {
@@ -44,7 +46,21 @@ func Is(err error, target *Error) bool {
 }
 
 func (e *Error) Error() string {
-	return e.Err.Error()
+	base := e.Code
+	if e.Err != nil {
+		base = e.Err.Error()
+	}
+	if len(e.Tags) > 0 {
+		return "[" + strings.Join(e.Tags, "-") + "] " + base
+	}
+	return base
+}
+
+func (e *Error) WithTags(tags ...string) *Error {
+	if len(tags) > 0 {
+		e.Tags = append(e.Tags, tags...)
+	}
+	return e
 }
 
 func (e *Error) Wrap(err error) *Error {
