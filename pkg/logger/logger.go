@@ -2,48 +2,59 @@ package logger
 
 import (
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
+	"sync"
 )
 
 var (
-	Log *zap.Logger
+	once     sync.Once
+	instance *zap.Logger
 )
 
 func Init() error {
-	var err error
-	env := os.Getenv("APP_ENV")
+	var initErr error
+	once.Do(func() {
+		env := os.Getenv("APP_ENV")
+		var cfg zap.Config
+		if env == "production" {
+			cfg = zap.NewProductionConfig()
+		} else {
+			cfg = zap.NewDevelopmentConfig()
+		}
+		cfg.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+		instance, initErr = cfg.Build()
+	})
+	return initErr
+}
 
-	if env == "development" {
-		Log, err = zap.NewDevelopment()
-	} else {
-		Log, err = zap.NewProduction()
+func Get() *zap.Logger {
+	if instance == nil {
+		panic("logger not initialized - call logger.Init() first")
 	}
+	return instance
+}
 
-	if err != nil {
-		return err
-	}
-
-	Log.Info("Logger: Init", zap.String("env", env))
-
-	return nil
+func Sync() error {
+	return instance.Sync()
 }
 
 func Debug(msg string, fields ...zap.Field) {
-	Log.Debug(msg, fields...)
+	instance.Debug(msg, fields...)
 }
 
 func Info(msg string, fields ...zap.Field) {
-	Log.Info(msg, fields...)
+	instance.Info(msg, fields...)
 }
 
 func Warn(msg string, fields ...zap.Field) {
-	Log.Warn(msg, fields...)
+	instance.Warn(msg, fields...)
 }
 
 func Error(msg string, fields ...zap.Field) {
-	Log.Error(msg, fields...)
+	instance.Error(msg, fields...)
 }
 
 func Fatal(msg string, fields ...zap.Field) {
-	Log.Fatal(msg, fields...)
+	instance.Fatal(msg, fields...)
 }

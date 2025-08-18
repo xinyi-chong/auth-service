@@ -8,8 +8,10 @@ import (
 	token "auth-service/pkg/jwt"
 	"auth-service/pkg/logger"
 	redisclient "auth-service/pkg/redis"
+	"go.uber.org/zap"
 	"net/http"
 	"os"
+	"strings"
 
 	"context"
 	ginzap "github.com/gin-contrib/zap"
@@ -17,7 +19,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"time"
 )
@@ -64,12 +65,14 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	log := logger.Get()
+
 	server := &Server{
 		router: gin.New(),
 		db:     gormDB,
 		redis:  redisClient,
 		config: cfg,
-		logger: logger.Log,
+		logger: log,
 	}
 
 	server.setupMiddleware()
@@ -84,14 +87,18 @@ func (s *Server) Start() error {
 		zap.String("address", addr),
 		zap.String("environment", os.Getenv("APP_ENV")),
 	)
-
 	return s.router.Run(addr)
 }
 
 func (s *Server) setupMiddleware() {
 	s.router.Use(
-		ginzap.Ginzap(logger.Log, time.RFC3339, true),
-		ginzap.RecoveryWithZap(logger.Log, true),
+		func(c *gin.Context) {
+			if !strings.HasPrefix(c.Request.URL.Path, "/swagger/") {
+				ginzap.Ginzap(s.logger, time.RFC3339, true)(c)
+			}
+			c.Next()
+		},
+		ginzap.RecoveryWithZap(s.logger, true),
 		middleware.CORSMiddleware(),
 		middleware.RateLimit(100, time.Hour),
 		middleware.LocaleMiddleware(),

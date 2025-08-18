@@ -4,6 +4,7 @@ import (
 	_ "auth-service/docs"
 	"auth-service/internal/api"
 	"auth-service/pkg/logger"
+	"fmt"
 	"go.uber.org/zap"
 	"os"
 )
@@ -17,9 +18,10 @@ import (
 // @description Bearer Token Authentication. Example: `Bearer <your-jwt-token>`
 func main() {
 	if err := logger.Init(); err != nil {
-		logger.Fatal("Failed to initialize logger", zap.Error(err))
+		fmt.Printf("FATAL: logger init failed: %v\n", err)
+		os.Exit(1)
 	}
-	defer logger.Log.Sync()
+	defer logger.Sync()
 
 	server, err := api.NewServer()
 	if err != nil {
