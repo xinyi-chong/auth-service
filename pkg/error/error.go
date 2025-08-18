@@ -32,7 +32,7 @@ type Error struct {
 }
 
 func New(code, defaultMsg string, status int) *Error {
-	return &Error{Code: code, DefaultMsg: defaultMsg, HTTPStatus: status}
+	return &Error{Code: code, DefaultMsg: defaultMsg, HTTPStatus: status, Err: errors.New(code)}
 }
 
 func Is(err error, target *Error) bool {
@@ -52,12 +52,13 @@ func (e *Error) Wrap(err error) *Error {
 	return e
 }
 
+func IsDbErrNotFound(err error) bool {
+	return errors.Is(err, gorm.ErrRecordNotFound)
+}
+
 func HandleDbNotFoundError(err error, notFoundErr *Error) *Error {
-	var e *Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		e = notFoundErr
-	} else {
-		e = ErrInternalServerError
+	if IsDbErrNotFound(err) {
+		return notFoundErr
 	}
-	return e
+	return ErrInternalServerError.Wrap(err)
 }
