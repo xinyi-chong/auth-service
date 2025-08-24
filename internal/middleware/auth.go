@@ -5,10 +5,12 @@ import (
 	"auth-service/internal/shared/response"
 	apperrors "auth-service/pkg/error"
 	token "auth-service/pkg/jwt"
+	"auth-service/pkg/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
+	"go.uber.org/zap"
 	"strings"
 	"time"
 )
@@ -56,6 +58,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if strings.HasPrefix(authHeader, "Bearer ") {
 			bearerToken = strings.TrimPrefix(authHeader, "Bearer ")
 		} else {
+			logger.Debug("missing or invalid Authorization header")
 			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
@@ -63,15 +66,19 @@ func AuthMiddleware() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		blacklisted, _ := token.IsTokenBlacklisted(ctx, bearerToken)
 		if blacklisted {
+			logger.Debug("token is blacklisted", zap.String("token", bearerToken))
 			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
 
 		accessClaims, err := token.ParseAccessToken(bearerToken)
 		if err != nil {
+			logger.Debug("invalid access token", zap.Error(err))
 			response.Error(c, apperrors.ErrUnauthorized)
 			return
 		}
+
+		logger.Debug("access claims", zap.Any("claims", accessClaims))
 
 		c.Set(consts.AccessToken, bearerToken)
 		c.Set(consts.UserId, accessClaims.UserID)
