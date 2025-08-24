@@ -69,7 +69,7 @@ func (s *service) CreateUser(ctx context.Context, param *CreateUserParam) error 
 		IsActive:     true,
 	}
 
-	if *param.Username != "" {
+	if param.Username != nil && *param.Username != "" {
 		user.Username = param.Username
 	}
 

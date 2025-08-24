@@ -108,7 +108,7 @@ func (r *repository) UsernameOrEmailExists(ctx context.Context, username *string
 		Or("email = ?", email)
 
 	if username != nil && *username != "" {
-		query = query.Or("username = ?", username)
+		query = query.Or("username = ?", *username)
 	}
 
 	err := query.Count(&count).Error
