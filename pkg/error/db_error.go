@@ -40,9 +40,6 @@ func HandleDbDeleteErr(err error, model Model) *Error {
 	if isDbErrNotFound(err) {
 		return getModelNotFoundError(model).Wrap(err)
 	}
-	if errors.Is(err, gorm.ErrDuplicatedKey) {
-		return getModelConflictError(model).Wrap(err)
-	}
 	return ErrInternalServerError.Wrap(err)
 }
 
