@@ -35,7 +35,8 @@ func Init(cfg Config) (*gorm.DB, error) {
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},
-		PrepareStmt: true,
+		PrepareStmt:    true,
+		TranslateError: true,
 	})
 
 	if err != nil {
