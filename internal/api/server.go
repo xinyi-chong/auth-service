@@ -2,8 +2,10 @@ package api
 
 import (
 	"auth-service/db"
+	"auth-service/internal/auth"
 	"auth-service/internal/config"
 	"auth-service/internal/middleware"
+	"auth-service/internal/user"
 	locale "auth-service/pkg/i18n"
 	token "auth-service/pkg/jwt"
 	"auth-service/pkg/logger"
@@ -29,6 +31,8 @@ type Server struct {
 	redis  *redis.Client
 	config *config.Config
 	logger *zap.Logger
+
+	authCtrl *auth.Controller
 }
 
 func NewServer() (*Server, error) {
@@ -66,27 +70,31 @@ func NewServer() (*Server, error) {
 	}
 
 	log := logger.Get()
+	userRepo := user.NewRepository(gormDB)
+	userSvc := user.NewService(userRepo, log)
+	authSvc := auth.NewService(userSvc, log)
+	authCtrl := auth.NewController(authSvc, log)
 
-	server := &Server{
-		router: gin.New(),
-		db:     gormDB,
-		redis:  redisClient,
-		config: cfg,
-		logger: log,
+	s := &Server{
+		router:   gin.New(),
+		db:       gormDB,
+		redis:    redisClient,
+		config:   cfg,
+		logger:   log,
+		authCtrl: authCtrl,
 	}
 
-	server.setupMiddleware()
-	server.setupRoutes()
+	s.setupMiddleware()
+	s.setupRoutes()
 
-	return server, nil
+	return s, nil
 }
 
 func (s *Server) Start() error {
 	addr := ":" + s.config.Server.Port
 	s.logger.Info("Starting server",
-		zap.String("address", addr),
-		zap.String("environment", os.Getenv("APP_ENV")),
-	)
+		zap.String("addr", addr),
+		zap.String("environment", os.Getenv("APP_ENV")))
 	return s.router.Run(addr)
 }
 
@@ -111,4 +119,24 @@ func (s *Server) setupRoutes() {
 	})
 
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	api := s.router.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		{
+			s.registerAuthRoutes(v1)
+		}
+	}
+}
+
+func (s *Server) registerAuthRoutes(rg *gin.RouterGroup) {
+	g := rg.Group("/auth")
+	{
+		g.POST("/register", s.authCtrl.Register)
+		g.POST("/login", s.authCtrl.Login)
+		g.POST("/refresh", s.authCtrl.RefreshToken)
+		g.Use(middleware.AuthMiddleware())
+		g.PATCH("/change-password", s.authCtrl.ChangePassword)
+		g.POST("/logout", s.authCtrl.Logout)
+	}
 }

@@ -14,6 +14,7 @@ var (
 	ErrInternalServerError      = New("internal_server_error", http.StatusInternalServerError)
 	ErrTooManyRequests          = New("too_many_requests", http.StatusTooManyRequests)
 	ErrRegistrationFailed       = New("registration_failed", http.StatusInternalServerError)
+	ErrLoginFailed              = New("login_failed", http.StatusInternalServerError)
 	ErrInvalidEmail             = New("invalid_email", http.StatusBadRequest)
 	ErrIncorrectEmailOrPassword = New("incorrect_email_or_password", http.StatusUnauthorized)
 	ErrIncorrectPassword        = New("incorrect_password", http.StatusUnauthorized)
