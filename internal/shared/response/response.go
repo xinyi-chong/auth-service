@@ -22,16 +22,31 @@ func Success(c *gin.Context, success *success.Success, data interface{}) {
 	})
 }
 
-func Error(c *gin.Context, err error) {
-	var appErr *apperrors.Error
-	ok := errors.As(err, &appErr)
-	if !ok {
-		appErr = apperrors.ErrInternalServerError
+func Error(c *gin.Context, err error, overrideErr ...*apperrors.Error) {
+	var override *apperrors.Error
+	if len(overrideErr) > 0 {
+		override = overrideErr[0]
 	}
 
-	message := locale.Translate(c, locale.CategoryError, appErr.Code, appErr.TemplateData)
+	appErr := getDisplayErr(err, override)
+	message := locale.Translate(c, locale.CategoryError, appErr.MessageKey, appErr.TemplateData)
 
 	c.JSON(appErr.HTTPStatus, Response{
 		Message: message,
 	})
+}
+
+func getDisplayErr(err error, overrideErr *apperrors.Error) *apperrors.Error {
+	var appErr *apperrors.Error
+	if overrideErr != nil {
+		if !errors.As(err, &appErr) || errors.Is(err, apperrors.ErrInternalServerError) {
+			return overrideErr.Wrap(err)
+		}
+	}
+
+	if errors.As(err, &appErr) {
+		return appErr
+	}
+
+	return apperrors.ErrInternalServerError.Wrap(err)
 }
