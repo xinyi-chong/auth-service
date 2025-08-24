@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"regexp"
 )
@@ -13,9 +14,15 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func CheckPassword(hashedPassword, password string) bool {
+func IsPasswordMatch(hashedPassword, password string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	return err == nil
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func IsValidEmail(email string) bool {
