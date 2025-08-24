@@ -31,9 +31,7 @@ func Error(c *gin.Context, err error, overrideErr ...*apperrors.Error) {
 	appErr := getDisplayErr(err, override)
 	message := locale.Translate(c, locale.CategoryError, appErr.MessageKey, appErr.TemplateData)
 
-	c.JSON(appErr.HTTPStatus, Response{
-		Message: message,
-	})
+	c.AbortWithStatusJSON(appErr.HTTPStatus, Response{Message: message})
 }
 
 func getDisplayErr(err error, overrideErr *apperrors.Error) *apperrors.Error {
