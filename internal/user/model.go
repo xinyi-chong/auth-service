@@ -2,11 +2,12 @@ package user
 
 import (
 	"auth-service/pkg/filters"
+	"github.com/google/uuid"
 	"time"
 )
 
 type User struct {
-	ID                 string     `json:"id" db:"id"`
+	ID                 uuid.UUID  `json:"id" db:"id"`
 	Username           *string    `json:"username,omitempty" db:"username"`
 	Email              *string    `json:"email,omitempty" db:"email"`
 	EmailVerified      bool       `json:"email_verified" db:"email_verified"`
@@ -21,7 +22,7 @@ type User struct {
 }
 
 type Response struct {
-	ID                 string     `json:"id"`
+	ID                 uuid.UUID  `json:"id"`
 	Username           *string    `json:"username,omitempty"`
 	Email              *string    `json:"email,omitempty"`
 	EmailVerified      bool       `json:"email_verified"`

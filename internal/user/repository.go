@@ -3,15 +3,16 @@ package user
 import (
 	"auth-service/pkg/filters"
 	"context"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
 	Create(ctx context.Context, user *User) error
-	FindByID(ctx context.Context, id int) (*User, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*User, error)
 	FindByEmail(ctx context.Context, email string) (*User, error)
-	Update(ctx context.Context, id int, user *User) error
-	Delete(ctx context.Context, id int) error
+	Update(ctx context.Context, id uuid.UUID, user *User) error
+	Delete(ctx context.Context, id uuid.UUID) error
 	List(ctx context.Context, filter *Filter) ([]User, error)
 	Count(ctx context.Context, filter *Filter) (int64, error)
 	UsernameOrEmailExists(ctx context.Context, username *string, email string) (bool, error)
@@ -51,7 +52,7 @@ func (r *repository) Create(ctx context.Context, user *User) error {
 	return r.db.WithContext(ctx).Create(user).Error
 }
 
-func (r *repository) FindByID(ctx context.Context, id int) (*User, error) {
+func (r *repository) FindByID(ctx context.Context, id uuid.UUID) (*User, error) {
 	var user User
 	result := r.db.WithContext(ctx).First(&user, id)
 	return &user, result.Error
@@ -65,7 +66,7 @@ func (r *repository) FindByEmail(ctx context.Context, email string) (*User, erro
 	return &user, result.Error
 }
 
-func (r *repository) Update(ctx context.Context, id int, user *User) error {
+func (r *repository) Update(ctx context.Context, id uuid.UUID, user *User) error {
 	result := r.db.WithContext(ctx).
 		Where("id = ?", id).
 		Updates(user)
@@ -78,7 +79,7 @@ func (r *repository) Update(ctx context.Context, id int, user *User) error {
 	return nil
 }
 
-func (r *repository) Delete(ctx context.Context, id int) error {
+func (r *repository) Delete(ctx context.Context, id uuid.UUID) error {
 	result := r.db.WithContext(ctx).Delete(&User{}, id)
 	if result.Error != nil {
 		return result.Error

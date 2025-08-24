@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"os"
 	"sync"
@@ -26,14 +27,14 @@ var (
 
 type (
 	RefreshTokenClaims struct {
-		UserID string `json:"user_id"`
+		UserID uuid.UUID `json:"user_id"`
 		jwt.RegisteredClaims
 	}
 
 	AccessTokenClaims struct {
-		UserID   string  `json:"user_id"`
-		Username *string `json:"username"`
-		Email    *string `json:"email"`
+		UserID   uuid.UUID `json:"user_id"`
+		Username *string   `json:"username"`
+		Email    *string   `json:"email"`
 		jwt.RegisteredClaims
 	}
 )
@@ -63,7 +64,7 @@ func Init(cfg *config.Config) error {
 	return err
 }
 
-func GenerateAccessToken(userID string, username, email *string) (string, error) {
+func GenerateAccessToken(userID uuid.UUID, username, email *string) (string, error) {
 	accessClaims := AccessTokenClaims{
 		UserID:   userID,
 		Username: username,
@@ -76,7 +77,7 @@ func GenerateAccessToken(userID string, username, email *string) (string, error)
 	return generateToken(accessClaims)
 }
 
-func GenerateRefreshToken(userID string) (string, error) {
+func GenerateRefreshToken(userID uuid.UUID) (string, error) {
 	refreshClaims := RefreshTokenClaims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{

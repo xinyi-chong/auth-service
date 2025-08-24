@@ -10,11 +10,11 @@ import (
 
 type Service interface {
 	IsUsernameOrEmailRegistered(ctx context.Context, username *string, email string) (bool, error)
-	GetUser(ctx context.Context, id int) (*User, error)
+	GetUser(ctx context.Context, id uuid.UUID) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	CreateUser(ctx context.Context, param *CreateUserParam) error
-	UpdateUser(ctx context.Context, id int, param *UpdateUserParam) error
-	DeleteUser(ctx context.Context, id int) error
+	UpdateUser(ctx context.Context, id uuid.UUID, param *UpdateUserParam) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 	ListUsers(ctx context.Context, filter *Filter) ([]User, error)
 }
 
@@ -36,7 +36,7 @@ func (s *service) IsUsernameOrEmailRegistered(ctx context.Context, username *str
 	return exists, nil
 }
 
-func (s *service) GetUser(ctx context.Context, id int) (*User, error) {
+func (s *service) GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
 	const op = "service.GetUser"
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
@@ -63,11 +63,14 @@ func (s *service) CreateUser(ctx context.Context, param *CreateUserParam) error 
 	}
 
 	user := &User{
-		ID:           uuid.New().String(),
-		Username:     param.Username,
+		ID:           uuid.New(),
 		Email:        &param.Email,
 		PasswordHash: &hashedPassword,
 		IsActive:     true,
+	}
+
+	if *param.Username != "" {
+		user.Username = param.Username
 	}
 
 	err = s.repo.Create(ctx, user)
@@ -78,7 +81,7 @@ func (s *service) CreateUser(ctx context.Context, param *CreateUserParam) error 
 	return nil
 }
 
-func (s *service) UpdateUser(ctx context.Context, id int, param *UpdateUserParam) error {
+func (s *service) UpdateUser(ctx context.Context, id uuid.UUID, param *UpdateUserParam) error {
 	const op = "service.UpdateUser"
 
 	user := &User{}
@@ -102,7 +105,7 @@ func (s *service) UpdateUser(ctx context.Context, id int, param *UpdateUserParam
 	return nil
 }
 
-func (s *service) DeleteUser(ctx context.Context, id int) error {
+func (s *service) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	const op = "service.DeleteUser"
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return apperrors.HandleDbDeleteErr(err, apperrors.ModelUser).WithOp(op)
