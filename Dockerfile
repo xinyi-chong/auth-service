@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN swag init -g cmd/server/main.go
+RUN swag init -g cmd/server/main.go --parseDependency
 
 RUN go build -o auth-service cmd/server/main.go
 
