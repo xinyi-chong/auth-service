@@ -2,8 +2,6 @@ package token
 
 import (
 	"auth-service/internal/config"
-	"auth-service/pkg/logger"
-	redisclient "auth-service/pkg/redis"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -12,6 +10,8 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/logger"
+	redisclient "github.com/xinyi-chong/common-lib/redis"
 	"go.uber.org/zap"
 	"os"
 	"sync"

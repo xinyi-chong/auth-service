@@ -1,9 +1,9 @@
 package user
 
 import (
-	"auth-service/pkg/filters"
 	"context"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/filters"
 	"gorm.io/gorm"
 )
 

@@ -3,8 +3,8 @@ package main
 import (
 	_ "auth-service/docs"
 	"auth-service/internal/api"
-	"auth-service/pkg/logger"
 	"fmt"
+	"github.com/xinyi-chong/common-lib/logger"
 	"go.uber.org/zap"
 	"os"
 )

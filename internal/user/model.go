@@ -1,8 +1,8 @@
 package user
 
 import (
-	"auth-service/pkg/filters"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/filters"
 	"time"
 )
 

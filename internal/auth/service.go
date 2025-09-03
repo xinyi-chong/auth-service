@@ -3,10 +3,10 @@ package auth
 import (
 	"auth-service/internal/shared/utils"
 	userModel "auth-service/internal/user"
-	apperrors "auth-service/pkg/error"
 	"auth-service/pkg/jwt"
 	"context"
 	"github.com/google/uuid"
+	apperrors "github.com/xinyi-chong/common-lib/errors"
 	"go.uber.org/zap"
 )
 

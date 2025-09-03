@@ -6,6 +6,4 @@ const (
 	Email        = "email"
 	UserId       = "user_id"
 	Username     = "username"
-
-	Localizer = "localizer"
 )

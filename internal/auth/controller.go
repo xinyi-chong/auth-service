@@ -2,12 +2,12 @@ package auth
 
 import (
 	"auth-service/internal/shared/consts"
-	"auth-service/internal/shared/response"
 	"auth-service/internal/shared/utils"
-	apperrors "auth-service/pkg/error"
 	token "auth-service/pkg/jwt"
-	"auth-service/pkg/success"
 	"github.com/google/uuid"
+	apperrors "github.com/xinyi-chong/common-lib/errors"
+	"github.com/xinyi-chong/common-lib/response"
+	"github.com/xinyi-chong/common-lib/success"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -30,8 +30,10 @@ func NewController(service Service, logger *zap.Logger) *Controller {
 // @Accept json
 // @Produce json
 // @Param account body RegisterParam true "User Account"
-// @Success 201 {object} response.Response{data=user.Response}
-// @Failure 400 {object} response.Response
+// @Success 201 {object} response.Response "Created"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/register [post]
 func (ctrl *Controller) Register(c *gin.Context) {
 	var param RegisterParam
@@ -64,9 +66,11 @@ func (ctrl *Controller) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param account body LoginParam true "Credentials"
-// @Success 200 {object} response.Response{data=LoginResponse}
-// @Failure 400 {object} response.Response
-// @Failure 404 {object} response.Response
+// @Success 200 {object} response.Response{data=LoginResponse} "Success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 404 {object} response.Response "User not found"
+// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/login [post]
 func (ctrl *Controller) Login(c *gin.Context) {
 	var param LoginParam
@@ -107,8 +111,10 @@ func (ctrl *Controller) Login(c *gin.Context) {
 // @Produce json
 // @Security BearerTokenAuth
 // @Param body body ChangePasswordParam true "Change Password"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/change-password [patch]
 func (ctrl *Controller) ChangePassword(c *gin.Context) {
 	userIDValue, exists := c.Get(consts.UserId)
@@ -149,8 +155,10 @@ func (ctrl *Controller) ChangePassword(c *gin.Context) {
 // @Tags Authentication
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.Response{data=string} "Success"
-// @Failure 400 {object} response.Response
+// @Success 200 {object} response.Response{data=Tokens} "Success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/refresh [post]
 func (ctrl *Controller) RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
@@ -194,7 +202,10 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Success 200 {object} response.Response
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/logout [post]
 func (ctrl *Controller) Logout(c *gin.Context) {
 	c.SetCookie(

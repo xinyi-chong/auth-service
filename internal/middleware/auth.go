@@ -2,14 +2,14 @@ package middleware
 
 import (
 	"auth-service/internal/shared/consts"
-	"auth-service/internal/shared/response"
-	apperrors "auth-service/pkg/error"
 	token "auth-service/pkg/jwt"
-	"auth-service/pkg/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
+	apperrors "github.com/xinyi-chong/common-lib/errors"
+	"github.com/xinyi-chong/common-lib/logger"
+	"github.com/xinyi-chong/common-lib/response"
 	"go.uber.org/zap"
 	"strings"
 	"time"

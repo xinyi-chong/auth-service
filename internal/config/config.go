@@ -2,12 +2,12 @@ package config
 
 import (
 	"auth-service/db"
-	"auth-service/pkg/logger"
-	redisclient "auth-service/pkg/redis"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
+	"github.com/xinyi-chong/common-lib/logger"
+	redisclient "github.com/xinyi-chong/common-lib/redis"
 	"go.uber.org/zap"
 	"strings"
 	"time"

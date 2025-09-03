@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"auth-service/internal/shared/consts"
-	locale "auth-service/pkg/i18n"
 	"github.com/gin-gonic/gin"
+	"github.com/xinyi-chong/common-lib/consts"
+	locale "github.com/xinyi-chong/common-lib/i18n"
 )
 
 func LocaleMiddleware() gin.HandlerFunc {
