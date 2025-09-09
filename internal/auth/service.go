@@ -6,6 +6,7 @@ import (
 	"auth-service/pkg/jwt"
 	"context"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/consts"
 	apperrors "github.com/xinyi-chong/common-lib/errors"
 	"go.uber.org/zap"
 )
@@ -33,7 +34,7 @@ func (s *service) Register(ctx context.Context, param RegisterParam) error {
 	if err != nil {
 		return err
 	} else if exists {
-		return apperrors.ErrUserConflict.WithOp(op)
+		return apperrors.ErrXConflict.WithField(consts.UserField).WithOp(op)
 	}
 
 	user := &userModel.CreateUserParam{
@@ -64,7 +65,7 @@ func (s *service) Login(ctx context.Context, email, password string) (*LoginResp
 	if err != nil {
 		return nil, apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 	} else if !isValid {
-		return nil, apperrors.ErrIncorrectPassword.WithOp(op)
+		return nil, apperrors.ErrIncorrectX.WithField(consts.PasswordField).WithOp(op)
 	}
 
 	accessToken, err := token.GenerateAccessToken(user.ID, user.Email, user.Username)
@@ -97,7 +98,7 @@ func (s *service) ChangePassword(ctx context.Context, userID uuid.UUID, oldPassw
 	if err != nil {
 		return apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 	} else if !isValid {
-		return apperrors.ErrIncorrectPassword.WithOp(op)
+		return apperrors.ErrIncorrectX.WithField(consts.PasswordField).WithOp(op)
 	}
 
 	param := &userModel.UpdateUserParam{

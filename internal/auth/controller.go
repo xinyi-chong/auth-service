@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"auth-service/internal/shared/consts"
+	authconsts "auth-service/internal/shared/consts"
 	"auth-service/internal/shared/utils"
 	token "auth-service/pkg/jwt"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/consts"
 	apperrors "github.com/xinyi-chong/common-lib/errors"
 	"github.com/xinyi-chong/common-lib/response"
 	"github.com/xinyi-chong/common-lib/success"
@@ -44,7 +45,7 @@ func (ctrl *Controller) Register(c *gin.Context) {
 	}
 
 	if !utils.IsValidEmail(param.Email) {
-		response.Error(c, apperrors.ErrInvalidEmail)
+		response.Error(c, apperrors.ErrInvalidX.WithField(consts.EmailField))
 		return
 	}
 
@@ -76,7 +77,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	var param LoginParam
 	if err := c.ShouldBindJSON(&param); err != nil {
 		ctrl.logger.Debug("Invalid request payload", zap.Error(err))
-		response.Error(c, apperrors.ErrIncorrectEmailOrPassword)
+		response.Error(c, apperrors.ErrIncorrectX.WithField(consts.EmailOrPasswordField))
 		return
 	}
 
@@ -91,7 +92,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	// Set refresh token cookie
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		consts.RefreshToken,
+		authconsts.RefreshToken,
 		resp.RefreshToken,
 		int((time.Hour * 24 * 30).Seconds()),
 		"/",
@@ -117,7 +118,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 // @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/change-password [patch]
 func (ctrl *Controller) ChangePassword(c *gin.Context) {
-	userIDValue, exists := c.Get(consts.UserId)
+	userIDValue, exists := c.Get(authconsts.UserId)
 	if !exists {
 		ctrl.logger.Debug("Missing user ID in context")
 		response.Error(c, apperrors.ErrUnauthorized)
@@ -146,7 +147,7 @@ func (ctrl *Controller) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, success.PasswordChanged, nil)
+	response.Success(c, success.XChanged.WithField(consts.PasswordField), nil)
 }
 
 // RefreshToken godoc
@@ -180,7 +181,7 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		consts.RefreshToken,
+		authconsts.RefreshToken,
 		tokens.RefreshToken,
 		int((time.Hour * 24 * 30).Seconds()),
 		"/",
@@ -209,7 +210,7 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 // @Router /auth/logout [post]
 func (ctrl *Controller) Logout(c *gin.Context) {
 	c.SetCookie(
-		consts.RefreshToken,
+		authconsts.RefreshToken,
 		"",
 		-1,
 		"/",
@@ -220,7 +221,7 @@ func (ctrl *Controller) Logout(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	refreshToken, _ := c.Cookie(consts.RefreshToken)
+	refreshToken, _ := c.Cookie(authconsts.RefreshToken)
 	err := token.InvalidateToken(ctx, refreshToken)
 	if err != nil {
 		ctrl.logger.Error("Invalidate Refresh Token error", zap.Error(err))
@@ -228,7 +229,7 @@ func (ctrl *Controller) Logout(c *gin.Context) {
 		return
 	}
 
-	accessToken := c.GetString(consts.AccessToken)
+	accessToken := c.GetString(authconsts.AccessToken)
 	err = token.InvalidateToken(ctx, accessToken)
 	if err != nil {
 		ctrl.logger.Error("Invalidate Access Token error", zap.Error(err))

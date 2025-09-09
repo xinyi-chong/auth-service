@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/consts"
 	"github.com/xinyi-chong/common-lib/logger"
 	redisclient "github.com/xinyi-chong/common-lib/redis"
 	"go.uber.org/zap"
@@ -116,7 +117,7 @@ func ParseRefreshToken(refreshToken string) (*RefreshTokenClaims, error) {
 
 func InvalidateToken(ctx context.Context, token string) error {
 	if token == "" {
-		return errors.New("empty_token")
+		return errors.New("empty token")
 	}
 
 	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, keyFunc)
@@ -139,7 +140,7 @@ func InvalidateToken(ctx context.Context, token string) error {
 	}
 
 	hashedToken := secureHash(token)
-	if err := redisclient.Set(ctx, getRedisBlacklistKey(hashedToken), "revoked", ttl); err != nil {
+	if err := redisclient.Set(ctx, consts.RedisAuthBlacklistPrefix+hashedToken, "revoked", ttl); err != nil {
 		return fmt.Errorf("storage failure: %w", err)
 	}
 
@@ -148,7 +149,7 @@ func InvalidateToken(ctx context.Context, token string) error {
 
 func IsTokenBlacklisted(ctx context.Context, token string) (bool, error) {
 	hashedToken := secureHash(token)
-	return redisclient.Exists(ctx, getRedisBlacklistKey(hashedToken))
+	return redisclient.Exists(ctx, consts.RedisAuthBlacklistPrefix+hashedToken)
 }
 
 func generateToken(claims jwt.Claims) (string, error) {
@@ -167,8 +168,4 @@ func secureHash(data string) string {
 	h := hmac.New(sha256.New, secretKey)
 	h.Write([]byte(data))
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func getRedisBlacklistKey(tokenHash string) string {
-	return "blacklist:" + tokenHash
 }
