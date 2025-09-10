@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"auth-service/internal/shared/consts"
 	token "auth-service/pkg/jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
+	"github.com/xinyi-chong/common-lib/consts"
 	apperrors "github.com/xinyi-chong/common-lib/errors"
 	"github.com/xinyi-chong/common-lib/logger"
 	"github.com/xinyi-chong/common-lib/response"
@@ -80,10 +80,10 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		logger.Debug("access claims", zap.Any("claims", accessClaims))
 
-		c.Set(consts.AccessToken, bearerToken)
-		c.Set(consts.UserId, accessClaims.UserID)
-		c.Set(consts.Username, accessClaims.Username)
-		c.Set(consts.Email, accessClaims.Email)
+		c.Set(consts.CtxAccessToken, bearerToken)
+		c.Set(consts.CtxUserID, accessClaims.UserID)
+		c.Set(consts.CtxUsername, accessClaims.Username)
+		c.Set(consts.CtxUserEmail, accessClaims.Email)
 
 		c.Next()
 	}

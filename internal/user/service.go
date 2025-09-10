@@ -1,7 +1,6 @@
 package user
 
 import (
-	"auth-service/internal/shared/utils"
 	dberrors "auth-service/pkg/error"
 	"context"
 	"github.com/google/uuid"
@@ -59,7 +58,7 @@ func (s *service) GetUserByEmail(ctx context.Context, email string) (*User, erro
 func (s *service) CreateUser(ctx context.Context, param *CreateUserParam) error {
 	const op = "service.CreateUser"
 
-	hashedPassword, err := utils.HashPassword(param.Password)
+	hashedPassword, err := hashPassword(param.Password)
 	if err != nil {
 		return apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 	}
@@ -93,7 +92,7 @@ func (s *service) UpdateUser(ctx context.Context, id uuid.UUID, param *UpdateUse
 	}
 
 	if param.Password != nil {
-		hashedPassword, err := utils.HashPassword(*param.Password)
+		hashedPassword, err := hashPassword(*param.Password)
 		if err != nil {
 			return apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 		}

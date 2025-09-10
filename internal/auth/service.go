@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"auth-service/internal/shared/utils"
 	userModel "auth-service/internal/user"
 	"auth-service/pkg/jwt"
 	"context"
@@ -61,7 +60,7 @@ func (s *service) Login(ctx context.Context, email, password string) (*LoginResp
 		return nil, err
 	}
 
-	isValid, err := utils.IsPasswordMatch(*user.PasswordHash, password)
+	isValid, err := isPasswordMatch(*user.PasswordHash, password)
 	if err != nil {
 		return nil, apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 	} else if !isValid {
@@ -94,7 +93,7 @@ func (s *service) ChangePassword(ctx context.Context, userID uuid.UUID, oldPassw
 		return err
 	}
 
-	isValid, err := utils.IsPasswordMatch(*user.PasswordHash, oldPassword)
+	isValid, err := isPasswordMatch(*user.PasswordHash, oldPassword)
 	if err != nil {
 		return apperrors.ErrInternalServerError.WithOp(op).Wrap(err)
 	} else if !isValid {
