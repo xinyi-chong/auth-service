@@ -5,6 +5,7 @@ import (
 	dberrors "auth-service/pkg/error"
 	"context"
 	"github.com/google/uuid"
+	"github.com/xinyi-chong/common-lib/consts"
 	apperrors "github.com/xinyi-chong/common-lib/errors"
 	"go.uber.org/zap"
 )
@@ -32,7 +33,7 @@ func (s *service) IsUsernameOrEmailRegistered(ctx context.Context, username *str
 	const op = "service.IsUsernameOrEmailRegistered"
 	exists, err := s.repo.UsernameOrEmailExists(ctx, username, email)
 	if err != nil {
-		return false, dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return false, dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 	return exists, nil
 }
@@ -41,7 +42,7 @@ func (s *service) GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
 	const op = "service.GetUser"
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return nil, dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 	return user, nil
 }
@@ -50,7 +51,7 @@ func (s *service) GetUserByEmail(ctx context.Context, email string) (*User, erro
 	const op = "service.GetUserByEmail"
 	user, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return nil, dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 	return user, nil
 }
@@ -76,7 +77,7 @@ func (s *service) CreateUser(ctx context.Context, param *CreateUserParam) error 
 
 	err = s.repo.Create(ctx, user)
 	if err != nil {
-		return dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 
 	return nil
@@ -100,7 +101,7 @@ func (s *service) UpdateUser(ctx context.Context, id uuid.UUID, param *UpdateUse
 	}
 
 	if err := s.repo.Update(ctx, id, user); err != nil {
-		return dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 
 	return nil
@@ -109,7 +110,7 @@ func (s *service) UpdateUser(ctx context.Context, id uuid.UUID, param *UpdateUse
 func (s *service) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	const op = "service.DeleteUser"
 	if err := s.repo.Delete(ctx, id); err != nil {
-		return dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 	return nil
 }
@@ -118,7 +119,7 @@ func (s *service) ListUsers(ctx context.Context, filter *Filter) ([]User, error)
 	const op = "service.ListUsers"
 	users, err := s.repo.List(ctx, filter)
 	if err != nil {
-		return nil, dberrors.WrapDBError(err, dberrors.ModelUser).WithOp(op)
+		return nil, dberrors.WrapDBError(err, consts.UserField).WithOp(op)
 	}
 	return users, nil
 }
