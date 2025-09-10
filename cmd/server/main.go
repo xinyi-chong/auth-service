@@ -4,6 +4,7 @@ import (
 	_ "auth-service/docs"
 	"auth-service/internal/api"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/xinyi-chong/common-lib/logger"
 	"go.uber.org/zap"
 	"os"
@@ -19,6 +20,18 @@ import (
 // @name Authorization
 // @description Bearer Token Authentication. Example: `Bearer <your-jwt-token>`
 func main() {
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" {
+		appEnv = "local"
+	}
+
+	if appEnv == "local" {
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Println("Error loading .env file")
+		}
+	}
+
 	if err := logger.Init(); err != nil {
 		fmt.Printf("FATAL: logger init failed: %v\n", err)
 		os.Exit(1)

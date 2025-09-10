@@ -79,7 +79,7 @@ func setupViper() *viper.Viper {
 	v.SetConfigName("auth-service")
 	v.SetConfigType("yaml")
 	v.AddConfigPath("/app/configs")
-	v.AddConfigPath(".") // For local development
+	v.AddConfigPath("./configs") // For local development
 
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
