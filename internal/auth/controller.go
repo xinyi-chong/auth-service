@@ -177,29 +177,33 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 // @Produce json
 // @Security BearerTokenAuth
 // @Success 200 {object} response.Response "Success"
-// @Failure 400 {object} response.Response "Bad Request"
 // @Failure 401 {object} response.Response "Unauthorized"
-// @Failure 500 {object} response.Response "Internal Server Error"
 // @Router /auth/logout [post]
 func (ctrl *Controller) Logout(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		ctrl.logger.Warn("missing or invalid Authorization header")
+		response.Error(c, apperrors.ErrUnauthorized)
+		return
+	}
+	accessToken := strings.TrimPrefix(authHeader, "Bearer ")
+
 	clearRefreshTokenCookie(c)
 
 	ctx := c.Request.Context()
-
-	refreshToken, _ := c.Cookie(authconsts.CookieRefreshToken)
-	err := token.InvalidateToken(ctx, refreshToken)
+	refreshToken, err := c.Cookie(authconsts.CookieRefreshToken)
 	if err != nil {
-		ctrl.logger.Error("Invalidate Refresh Token error", zap.Error(err))
-		response.Error(c, apperrors.ErrSessionExpired)
-		return
+		ctrl.logger.Warn("Get Refresh Token error", zap.Error(err))
+	} else {
+		err = token.InvalidateToken(ctx, refreshToken)
+		if err != nil {
+			ctrl.logger.Warn("Invalidate Refresh Token error", zap.Error(err))
+		}
 	}
 
-	accessToken := c.GetString(consts.CtxAccessToken)
 	err = token.InvalidateToken(ctx, accessToken)
 	if err != nil {
-		ctrl.logger.Error("Invalidate Access Token error", zap.Error(err))
-		response.Error(c, apperrors.ErrSessionExpired)
-		return
+		ctrl.logger.Warn("Invalidate Access Token error", zap.Error(err))
 	}
 
 	response.Success(c, success.LoggedOut, nil)
