@@ -4,11 +4,11 @@ import (
 	"auth-service/db"
 	"auth-service/internal/auth"
 	"auth-service/internal/config"
-	"auth-service/internal/middleware"
 	"auth-service/internal/user"
 	token "auth-service/pkg/jwt"
 	locale "github.com/xinyi-chong/common-lib/i18n"
 	"github.com/xinyi-chong/common-lib/logger"
+	"github.com/xinyi-chong/common-lib/middleware"
 	redisclient "github.com/xinyi-chong/common-lib/redis"
 	"go.uber.org/zap"
 	"net/http"
@@ -108,8 +108,8 @@ func (s *Server) setupMiddleware() {
 		},
 		ginzap.RecoveryWithZap(s.logger, true),
 		middleware.CORSMiddleware(),
-		middleware.RateLimit(100, time.Hour),
 		middleware.LocaleMiddleware(),
+		middleware.ContextMiddleware(),
 	)
 }
 
@@ -135,7 +135,6 @@ func (s *Server) registerAuthRoutes(rg *gin.RouterGroup) {
 		g.POST("/register", s.authCtrl.Register)
 		g.POST("/login", s.authCtrl.Login)
 		g.POST("/refresh", s.authCtrl.RefreshToken)
-		g.Use(middleware.AuthMiddleware())
 		g.PATCH("/change-password", s.authCtrl.ChangePassword)
 		g.POST("/logout", s.authCtrl.Logout)
 	}
